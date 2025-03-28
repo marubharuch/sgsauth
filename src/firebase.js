@@ -1,5 +1,3 @@
-
-
 import { initializeApp } from "firebase/app";
 import { 
   getAuth, 
@@ -14,6 +12,7 @@ import {
   set, 
   get 
 } from "firebase/database";
+import { getFirestore } from "firebase/firestore"; // ✅ Import Firestore
 
 const firebaseConfig = {
     apiKey: "AIzaSyAJsqbc3ESm21xtkrWKVxbdQSZ8hG5t3EU",
@@ -31,6 +30,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getDatabase(app);
+const firestore = getFirestore(app); // ✅ Initialize Firestore
 
 // Function to handle Google Login
 const loginWithGoogle = async () => {
@@ -82,4 +82,5 @@ const checkAuthState = (callback) => {
   });
 };
 
-export { auth, provider, db, loginWithGoogle, logout, checkAuthState };
+// ✅ Export Firestore along with other services
+export { auth, provider, db, firestore, loginWithGoogle, logout, checkAuthState };

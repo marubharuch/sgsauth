@@ -14,6 +14,7 @@ import RoleManagement from "./components/RoleManagement";
 import DataEntryPage from "./pages/DataEntryPage"; // Import DataEntryPage
 import MigrateData from "./components/MigrateData";
 import FamilyForm from "./components/FamilyForm";
+import LocalStorageViewer from "./pages/LocalStorageViewer";
 const App = () => {
   return (
     <Router>
@@ -32,6 +33,7 @@ const App = () => {
           <Route path="/data-entry" element={<DataEntryPage />} /> {/* Data Entry Page Route */}
           <Route path="migrate" element={<MigrateData/>}/>
           <Route path="/family" element={<FamilyForm />} />
+          <Route path="/local"  element={<LocalStorageViewer/>}/>
         </Routes>
       </AuthProvider>
     </Router>
