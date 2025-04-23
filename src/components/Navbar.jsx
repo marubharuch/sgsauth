@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { FaUserCircle, FaTachometerAlt } from "react-icons/fa"; // Import icons
+import { FaUserCircle, FaTachometerAlt, FaUsers } from "react-icons/fa"; // Import icons
 
 const Navbar = () => {
   const { user, logout } = useAuth(); // FIX: Correct function name
@@ -25,6 +25,10 @@ const Navbar = () => {
     navigate(getDashboardRoute());
   };
 
+  const handleFamiliesClick = () => {
+    navigate("/families");
+  };
+
   const handleLogoutClick = async () => {
     try {
       await logout();
@@ -41,20 +45,25 @@ const Navbar = () => {
       <div className="flex items-center gap-4">
         {user ? (
           <>
-            {/* Dashboard Icon - Redirects to the respective dashboard */}
+            {/* Role Approvals Link for President & Committee Members */}
             {user && (user.role === "president" || user.role === "committee-member") && (
-  <Link to="/role-approval" className="text-white hover:text-gray-300">
-    Role Approvals
-  </Link>
-)}
+              <Link to="/role-approval" className="text-white hover:text-gray-300">
+                Role Approvals
+              </Link>
+            )}
 
-
-
-
+            {/* Dashboard Icon - Redirects to the respective dashboard */}
             <FaTachometerAlt 
               className="text-2xl cursor-pointer hover:text-gray-300" 
               onClick={handleDashboardClick}
               title="Go to Dashboard"
+            />
+
+            {/* Families Icon - Redirects to Families Page */}
+            <FaUsers 
+              className="text-2xl cursor-pointer hover:text-gray-300" 
+              onClick={handleFamiliesClick}
+              title="View Families"
             />
 
             {/* Profile Picture */}
@@ -67,12 +76,7 @@ const Navbar = () => {
             />
 
             {/* Logout Button */}
-            <button 
-              onClick={handleLogoutClick} 
-              className="bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
-            >
-              Logout
-            </button>
+            <button onClick={logout}>Logout</button>
           </>
         ) : (
           <Link to="/signin" className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded">

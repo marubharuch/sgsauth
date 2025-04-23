@@ -2,17 +2,16 @@ import { useState, useEffect } from "react";
 import { db } from "../firebase";
 import { ref, push, update, get } from "firebase/database";
 
-const FamilyForm = ({ onSelectFamily }) => {
-  const [searchData, setSearchData] = useState({ phone: "", headOfFamily: "", native: "", city: "" });
-  const [filteredFamilies, setFilteredFamilies] = useState([]);
-  const [selectedFamilyId, setSelectedFamilyId] = useState(null);
+const FamilyForm = ({ selectedFamilyId = null, onSelectFamily }) => {
+  const [families, setFamilies] = useState([]);
   const [formData, setFormData] = useState({
     headOfFamily: "",
-    address: "",
-    phone: "",
-    native: "",
     city: "",
+    native: "",
+    phone: "",
+    address: "",
     ancestors: "",
+    members: {},
   });
 
   useEffect(() => {
@@ -26,102 +25,110 @@ const FamilyForm = ({ onSelectFamily }) => {
     }
   }, [selectedFamilyId]);
 
-  const handleSearchChange = (e) => {
-    setSearchData({ ...searchData, [e.target.name]: e.target.value });
-  };
-
-  const handleSearch = () => {
-    
-    const familiesRef = ref(db, "families");
-    get(familiesRef).then((snapshot) => {
-      if (snapshot.exists()) {
-       console.log('search',snapshot) 
-        const families = snapshot.val();
-        const allFamilies = Object.entries(families).map(([id, family]) => ({ id, ...family }));
-        
-        const hasSearchInput = Object.values(searchData).some(value => value.trim() !== "");
-        
-        const filtered = hasSearchInput
-          ? allFamilies.filter(family =>
-              Object.keys(searchData).every(key =>
-                searchData[key].trim() === "" || 
-                (family[key] && family[key].toLowerCase().includes(searchData[key].toLowerCase()))
-              )
-            )
-          : allFamilies;
-        
-        setFilteredFamilies(filtered);
-      } else {
-        setFilteredFamilies([]);
-      }
-    });
-  };
-
-  const handleSelectFamily = (id) => {
-    setSelectedFamilyId(id);
-    onSelectFamily(id);
-  };
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleMemberChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updatedMembers = { ...prev.members };
+      updatedMembers[index] = { ...updatedMembers[index], [field]: value };
+      return { ...prev, members: updatedMembers };
+    });
+  };
+
+  const addMember = () => {
+    const newKey = Date.now();
+    setFormData((prev) => ({
+      ...prev,
+      members: {
+        ...prev.members,
+        [newKey]: {
+          name: "",
+          gender: "",
+          relationWithHOF: "",
+          maritalStatus: "",
+          occupation: "",
+          birthday: "",
+          mobile: "",
+          temporaryAddress: "",
+        },
+      },
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.headOfFamily || !formData.address) {
-      alert("Head of Family and Address are required.");
-      return;
-    }
     try {
       if (selectedFamilyId) {
-        await update(ref(db, `families/${selectedFamilyId}`), { ...formData, modifiedBy: "currentUserId" });
+        await update(ref(db, `families/${selectedFamilyId}`), {
+          ...formData,
+          modifiedBy: "currentUserId",
+        });
       } else {
         const newFamilyRef = push(ref(db, "families"));
-        await update(newFamilyRef, { ...formData, modifiedBy: "currentUserId", id: newFamilyRef.key });
-        setSelectedFamilyId(newFamilyRef.key);
+        await update(newFamilyRef, {
+          ...formData,
+          modifiedBy: "currentUserId",
+          id: newFamilyRef.key,
+        });
         onSelectFamily(newFamilyRef.key);
       }
-      alert("Family saved successfully!");
-    } catch (error) {
-      console.error("Error saving family:", error);
-      alert("Failed to save family.");
+      alert("Family data saved successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Error saving data.");
     }
   };
 
   return (
-    <div className="p-6 bg-white shadow-lg rounded-lg w-full max-w-2xl mx-auto">
-      <h2 className="text-xl font-semibold mb-4">Search Family</h2>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <input name="phone" value={searchData.phone} onChange={handleSearchChange} placeholder="Phone" className="border p-2 rounded" />
-        <input name="headOfFamily" value={searchData.headOfFamily} onChange={handleSearchChange} placeholder="Head of Family" className="border p-2 rounded" />
-        <input name="native" value={searchData.native} onChange={handleSearchChange} placeholder="Native" className="border p-2 rounded" />
-        <input name="city" value={searchData.city} onChange={handleSearchChange} placeholder="City" className="border p-2 rounded" />
-      </div>
-      <button onClick={handleSearch} className="bg-blue-600 text-white px-4 py-2 rounded">Search</button>
-      {filteredFamilies.length > 0 && (
-        <div className="mt-4">
-          <h3 className="text-lg font-medium">Select a Family</h3>
-          <ul className="border rounded-lg p-2">
-            {filteredFamilies.map((family) => (
-              <li key={family.id} className="p-2 border-b flex justify-between">
-                <span>{family.headOfFamily} - {family.phone}</span>
-                <button onClick={() => handleSelectFamily(family.id)} className="bg-green-500 text-white px-3 py-1 rounded">Select</button>
-              </li>
-            ))}
-          </ul>
+    <div className="p-6 bg-white shadow-lg rounded-lg w-full max-w-5xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Add / Edit Family</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <input name="headOfFamily" value={formData.headOfFamily} onChange={handleChange} placeholder="Head of Family" className="border p-2 rounded" />
+          <input name="city" value={formData.city} onChange={handleChange} placeholder="City" className="border p-2 rounded" />
+          <input name="native" value={formData.native} onChange={handleChange} placeholder="Native" className="border p-2 rounded" />
+          <input name="phone" value={formData.phone} onChange={handleChange} placeholder="Phone" className="border p-2 rounded" />
+          <input name="address" value={formData.address} onChange={handleChange} placeholder="Address" className="border p-2 rounded col-span-2" />
+          <input name="ancestors" value={formData.ancestors} onChange={handleChange} placeholder="Ancestors" className="border p-2 rounded col-span-2" />
         </div>
-      )}
-      <h2 className="text-xl font-semibold mt-6">Family Details</h2>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 mt-4">
-        <input name="headOfFamily" value={formData.headOfFamily} onChange={handleChange} placeholder="Head of Family" className="border p-2 rounded" />
-        <input name="address" value={formData.address} onChange={handleChange} placeholder="Address" className="border p-2 rounded" />
-        <input name="phone" value={formData.phone} onChange={handleChange} placeholder="Phone" className="border p-2 rounded" />
-        <input name="native" value={formData.native} onChange={handleChange} placeholder="Native" className="border p-2 rounded" />
-        <input name="city" value={formData.city} onChange={handleChange} placeholder="City" className="border p-2 rounded" />
-        <input name="ancestors" value={formData.ancestors} onChange={handleChange} placeholder="Ancestors" className="border p-2 rounded" />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">Save</button>
+
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-2">Members</h3>
+          <button type="button" onClick={addMember} className="mb-2 bg-green-600 text-white px-3 py-1 rounded">+ Add Member</button>
+          <table className="w-full border border-gray-300 text-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border p-2">Name</th>
+                <th className="border p-2">Gender</th>
+                <th className="border p-2">Relation</th>
+                <th className="border p-2">Marital</th>
+                <th className="border p-2">Occupation</th>
+                <th className="border p-2">Birthday</th>
+                <th className="border p-2">Mobile</th>
+                <th className="border p-2">Temp. Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(formData.members).map(([key, member]) => (
+                <tr key={key}>
+                  <td className="border p-2"><input value={member.name} onChange={(e) => handleMemberChange(key, "name", e.target.value)} className="w-full" /></td>
+                  <td className="border p-2"><input value={member.gender} onChange={(e) => handleMemberChange(key, "gender", e.target.value)} className="w-full" /></td>
+                  <td className="border p-2"><input value={member.relationWithHOF} onChange={(e) => handleMemberChange(key, "relationWithHOF", e.target.value)} className="w-full" /></td>
+                  <td className="border p-2"><input value={member.maritalStatus} onChange={(e) => handleMemberChange(key, "maritalStatus", e.target.value)} className="w-full" /></td>
+                  <td className="border p-2"><input value={member.occupation} onChange={(e) => handleMemberChange(key, "occupation", e.target.value)} className="w-full" /></td>
+                  <td className="border p-2"><input value={member.birthday} onChange={(e) => handleMemberChange(key, "birthday", e.target.value)} className="w-full" /></td>
+                  <td className="border p-2"><input value={member.mobile} onChange={(e) => handleMemberChange(key, "mobile", e.target.value)} className="w-full" /></td>
+                  <td className="border p-2"><input value={member.temporaryAddress} onChange={(e) => handleMemberChange(key, "temporaryAddress", e.target.value)} className="w-full" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <button type="submit" className="mt-4 bg-blue-600 text-white px-4 py-2 rounded">Save Family</button>
       </form>
-      <button onClick={() => setSelectedFamilyId(null)} className="mt-4 bg-gray-500 text-white px-4 py-2 rounded">Add New Family</button>
     </div>
   );
 };

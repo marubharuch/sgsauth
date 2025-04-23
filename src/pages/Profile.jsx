@@ -10,17 +10,13 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [familyData, setFamilyData] = useState(null);
-  const [forceRender, setForceRender] = useState(false);
-
+  
   useEffect(() => {
-    console.log("Checking family data in local storage:", localStorage.getItem(`family_${user.familyID}`));
-
     if (!user) return;
 
     const storedUserData = localStorage.getItem(`user_${user.uid}`);
     if (storedUserData) {
-      const parsedData = JSON.parse(storedUserData);
-      setPhone(parsedData.phone || "");
+      setPhone(JSON.parse(storedUserData).phone || "");
     } else {
       setPhone(user.phone || "");
     }
@@ -28,18 +24,14 @@ const Profile = () => {
     if (user.familyId) {
       const storedFamilyData = localStorage.getItem(`family_${user.familyId}`);
       if (storedFamilyData) {
-        console.log("Setting family data from local storage:", storedFamilyData);
-    
         setFamilyData(JSON.parse(storedFamilyData));
       } else {
-        // Fetch from RTDB if not in local storage
         const familyRef = ref(db, `families/${user.familyId}`);
         get(familyRef).then((snapshot) => {
           if (snapshot.exists()) {
             const familyInfo = snapshot.val();
             setFamilyData(familyInfo);
             localStorage.setItem(`family_${user.familyId}`, JSON.stringify(familyInfo));
-            setForceRender((prev) => !prev); // Force re-render
           }
         });
       }
@@ -48,10 +40,6 @@ const Profile = () => {
     setLoading(false);
   }, [user]);
 
-  useEffect(() => {
-    console.log("Updated Family Data:", familyData);
-  }, [familyData]);
-
   const handleUpdate = async () => {
     if (!user) return;
 
@@ -59,90 +47,63 @@ const Profile = () => {
     localStorage.setItem(`user_${user.uid}`, JSON.stringify(updatedUser));
     const userRef = ref(db, `users/${user.uid}`);
     await update(userRef, { phone });
-
+    
     setUser(updatedUser);
     setIsEditing(false);
     alert("Phone number updated successfully!");
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="text-center text-gray-500 mt-10">Loading...</p>;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h2 className="text-2xl font-bold mb-4">Profile</h2>
-
-      <div className="flex flex-col items-center gap-4 bg-white p-6 shadow-md rounded-lg">
-        <img
-          src={user.photoURL || "/default-avatar.png"}
-          alt="Profile"
-          className="w-20 h-20 rounded-full border border-gray-300"
-        />
-
-        <div className="w-60 text-center">
-          <label className="text-gray-600 text-sm">User ID</label>
-          <input
-            type="text"
-            value={user.uid}
-            className="border p-2 rounded w-full bg-gray-100"
-            readOnly
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-4 md:p-10">
+      <div className="w-full max-w-lg bg-white shadow-lg rounded-xl p-6 md:p-8">
+        <h2 className="text-2xl font-bold text-center text-blue-600">Profile</h2>
+        <div className="flex flex-col items-center mt-4">
+          <img
+            src={user.photoURL || "/default-avatar.png"}
+            alt="Profile"
+            className="w-24 h-24 rounded-full border-4 border-blue-500 shadow-md"
           />
-
-          <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Name:</strong> {user.name}</p>
-          <p><strong>Role:</strong> {user.role}</p>
+          <p className="mt-2 text-lg font-semibold">{user.name}</p>
+          <p className="text-sm text-gray-600">{user.email}</p>
+          <p className="text-sm bg-blue-100 px-3 py-1 rounded-full mt-1">{user.role}</p>
         </div>
-
-        {/* Editable Phone Number */}
-        {phone ? (
-          isEditing ? (
-            <>
+        
+        <div className="mt-6">
+          <label className="text-gray-600 text-sm">Phone Number</label>
+          {isEditing ? (
+            <div className="flex gap-2">
               <input
                 type="text"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="border p-2 rounded w-60"
-                placeholder="Enter Phone Number"
+                className="border p-2 rounded w-full"
               />
               <button
                 onClick={handleUpdate}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+                className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
               >
-                Update
+                Save
               </button>
-            </>
+            </div>
           ) : (
-            <div className="flex gap-2 items-center">
-              <p><strong>Phone:</strong> {phone}</p>
+            <div className="flex justify-between items-center border p-2 rounded bg-gray-100">
+              <span>{phone || "Not provided"}</span>
               <button
                 onClick={() => setIsEditing(true)}
-                className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-3 rounded"
+                className="text-blue-600 hover:text-blue-800 text-sm"
               >
                 Edit
               </button>
             </div>
-          )
-        ) : (
-          <>
-            <input
-              type="text"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="border p-2 rounded w-60"
-              placeholder="Enter Phone Number"
-            />
-            <button
-              onClick={handleUpdate}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-            >
-              Update
-            </button>
-          </>
-        )}
+          )}
+        </div>
       </div>
-
+      
       {familyData && (
-        <div className="mt-6 bg-white p-4 shadow-md rounded-lg w-80">
-          <h3 className="text-lg font-bold">Family Details</h3>
+        <div className="w-full max-w-lg bg-white shadow-lg rounded-xl p-6 md:p-8 mt-6">
+          <h3 className="text-lg font-bold text-blue-600">Family Details</h3>
           <p><strong>Address:</strong> {familyData.address}</p>
           <p><strong>Native:</strong> {familyData.native}</p>
           <p><strong>Head of Family:</strong> {familyData.headOfFamily}</p>
@@ -152,7 +113,7 @@ const Profile = () => {
       )}
 
       {user.role === "visitor" && (
-        <div className="mt-6">
+        <div className="w-full max-w-lg mt-6">
           <RoleRequestForm />
         </div>
       )}

@@ -14,13 +14,16 @@ import RoleManagement from "./components/RoleManagement";
 import DataEntryPage from "./pages/DataEntryPage"; // Import DataEntryPage
 import MigrateData from "./components/MigrateData";
 import FamilyForm from "./components/FamilyForm";
+import FamiliesTable from "./components/FamiliesTable";
 import LocalStorageViewer from "./pages/LocalStorageViewer";
+import AllRoutes from "./pages/AllRoutes"
 const App = () => {
   return (
     <Router>
       <AuthProvider> {/* Wrap everything inside AuthProvider */}
         <Navbar />
         <Routes>
+        <Route path="/all" element={<AllRoutes />} />
           <Route path="/" element={<VisitorDashboard />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/profile" element={<Profile />} />
@@ -34,6 +37,7 @@ const App = () => {
           <Route path="migrate" element={<MigrateData/>}/>
           <Route path="/family" element={<FamilyForm />} />
           <Route path="/local"  element={<LocalStorageViewer/>}/>
+          <Route path="/families" element={<FamiliesTable/>}/>
         </Routes>
       </AuthProvider>
     </Router>
