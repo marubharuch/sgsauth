@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { db } from "../firebase";
-import { ref, push, update, get } from "firebase/database";
+import { ref, push, update } from "firebase/database";
+import { useAuth } from "../context/AuthContext";
 
-const FamilyForm = ({ selectedFamilyId = null, onSelectFamily }) => {
-  const [families, setFamilies] = useState([]);
+const FamilyForm = () => {
   const [formData, setFormData] = useState({
     headOfFamily: "",
     city: "",
@@ -13,17 +13,7 @@ const FamilyForm = ({ selectedFamilyId = null, onSelectFamily }) => {
     ancestors: "",
     members: {},
   });
-
-  useEffect(() => {
-    if (selectedFamilyId) {
-      const familyRef = ref(db, `families/${selectedFamilyId}`);
-      get(familyRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          setFormData(snapshot.val());
-        }
-      });
-    }
-  }, [selectedFamilyId]);
+  const { user } = useAuth()
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -59,34 +49,41 @@ const FamilyForm = ({ selectedFamilyId = null, onSelectFamily }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!user) {
+      alert("User not logged in!");
+      return;
+    }
     try {
-      if (selectedFamilyId) {
-        await update(ref(db, `families/${selectedFamilyId}`), {
-          ...formData,
-          modifiedBy: "currentUserId",
-        });
-      } else {
-        const newFamilyRef = push(ref(db, "families"));
-        await update(newFamilyRef, {
-          ...formData,
-          modifiedBy: "currentUserId",
-          id: newFamilyRef.key,
-        });
-        onSelectFamily(newFamilyRef.key);
-      }
-      alert("Family data saved successfully!");
+      const newFamilyRef = push(ref(db, "families"));
+      await update(newFamilyRef, {
+        ...formData,
+        modifiedBy:user.uid ,
+      });
+      alert("New family added successfully!");
+
+      // Optionally reset form
+      setFormData({
+        headOfFamily: "",
+        city: "",
+        native: "",
+        phone: "",
+        address: "",
+        ancestors: "",
+        members: {},
+      });
     } catch (err) {
       console.error(err);
-      alert("Error saving data.");
+      alert("Error saving family data.");
     }
   };
 
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg w-full max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Add / Edit Family</h2>
+      <h2 className="text-2xl font-bold mb-4">Add New Family</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <input name="headOfFamily" value={formData.headOfFamily} onChange={handleChange} placeholder="Head of Family" className="border p-2 rounded" />
+          <input name="headOfFamily" value={formData.headOfFamily} onChange={handleChange} placeholder="Head of Family" className="border p-2 rounded" required />
           <input name="city" value={formData.city} onChange={handleChange} placeholder="City" className="border p-2 rounded" />
           <input name="native" value={formData.native} onChange={handleChange} placeholder="Native" className="border p-2 rounded" />
           <input name="phone" value={formData.phone} onChange={handleChange} placeholder="Phone" className="border p-2 rounded" />

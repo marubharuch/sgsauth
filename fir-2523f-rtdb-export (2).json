@@ -1,0 +1,26 @@
+{
+  "families": {
+    "family001": { "address": "123 Main Street, Springfield", "createdBy": "user123", "head": "John Doe", "id": "family001", "members": {"member1": {"age": 45, "gender": "Male", "name": "John Doe", "relation": "Self"}, "member2": {"age": 42, "gender": "Female", "name": "Mary Doe", "relation": "Spouse"}, "member3": {"age": 12, "gender": "Male", "name": "Timmy Doe", "relation": "Son"}}},
+    "family002": { "address": "456 Elm Street, Rivertown", "createdBy": "user789", "head": "Alice Smith", "id": "family002", "members": {"member1": {"age": 38, "gender": "Female", "name": "Alice Smith", "relation": "Self"}, "member2": {"age": 40, "gender": "Male", "name": "Robert Smith", "relation": "Spouse"}, "member3": {"age": 15, "gender": "Female", "name": "Sophie Smith", "relation": "Daughter"}}},
+    "family003": { "address": "789 Oak Lane, Greenfield", "createdBy": "user321", "head": "Carlos Rivera", "id": "family003", "members": {"member1": {"age": 50, "gender": "Male", "name": "Carlos Rivera", "relation": "Self"}, "member2": {"age": 48, "gender": "Female", "name": "Elena Rivera", "relation": "Spouse"}}},
+    "family004": { "address": "321 Pine Street, Brookfield", "createdBy": "user654", "head": "David Kim", "id": "family004", "members": {"member1": {"age": 34, "gender": "Male", "name": "David Kim", "relation": "Self"}, "member2": {"age": 30, "gender": "Female", "name": "Lily Kim", "relation": "Spouse"}, "member3": {"age": 5, "gender": "Male", "name": "Ethan Kim", "relation": "Son"}, "member4": {"age": 3, "gender": "Female", "name": "Emma Kim", "relation": "Daughter"}}},
+    "family005": { "address": "654 Cedar Ave, Lakewood", "createdBy": "user987", "head": "Priya Patel", "id": "family005", "members": {"member1": {"age": 41, "gender": "Female", "name": "Priya Patel", "relation": "Self"}, "member2": {"age": 43, "gender": "Male", "name": "Raj Patel", "relation": "Spouse"}}}
+  },
+  "users": {
+    "user123": {"email": "john@example.com", "familyId": "family001", "name": "John Doe", "phone": "1234567890", "photoURL": "/default-avatar.png", "role": "admin", "uid": "user123"},
+    "user456": {"email": "jane@example.com", "name": "Jane Visitor", "phone": "9876543210", "photoURL": "/default-avatar.png", "role": "committee-member", "uid": "user456"},
+    "user789": {"email": "alice@example.com", "familyId": "family002", "name": "Alice Smith", "phone": "5551234567", "photoURL": "/default-avatar.png", "role": "admin", "uid": "user789"},
+    "user321": {"email": "carlos@example.com", "familyId": "family003", "name": "Carlos Rivera", "phone": "5557654321", "photoURL": "/default-avatar.png", "role": "admin", "uid": "user321"},
+    "user654": {"email": "david@example.com", "familyId": "family004", "name": "David Kim", "phone": "5551122334", "photoURL": "/default-avatar.png", "role": "admin", "uid": "user654"},
+    "user987": {"email": "priya@example.com", "familyId": "family005", "name": "Priya Patel", "phone": "5559988776", "photoURL": "/default-avatar.png", "role": "admin", "uid": "user987"},
+    "user888": {"email": "mike@example.com", "name": "Mike Taylor", "phone": "5558899001", "photoURL": "/default-avatar.png", "role": "committee-member", "uid": "user888"},
+    "user777": {"email": "nina@example.com", "name": "Nina Brown", "phone": "5556677885", "photoURL": "/default-avatar.png", "role": "visitor", "uid": "user777"},
+    "user666": {"email": "sanjay@example.com", "name": "Sanjay Mehta", "phone": "5551122990", "photoURL": "/default-avatar.png", "role": "committee-member", "uid": "user666"},
+    "user555": {"email": "lara@example.com", "name": "Lara Croft", "phone": "5553322110", "photoURL": "/default-avatar.png", "role": "visitor", "uid": "user555"}
+  },
+  "roleHistory": {
+    "user456": {"1745549724834": {"changedBy": "Dhruv Shah", "changedByUid": "rNwlqRpgLFg9XzVW22CemhPTA2I3", "newRole": "committee-member", "timestamp": 1745549724835}},
+    "user888": {"1745551122000": {"changedBy": "Alice Smith", "changedByUid": "user789", "newRole": "committee-member", "timestamp": 1745551122000}},
+    "user666": {"1745552233000": {"changedBy": "Carlos Rivera", "changedByUid": "user321", "newRole": "committee-member", "timestamp": 1745552233000}}
+  }
+}

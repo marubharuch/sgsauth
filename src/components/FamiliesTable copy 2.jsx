@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import localforage from "localforage";
 import EditFamilyModal from "./EditFamilyModal";
 import FamilyMembersTable from "./FamilyMembersTable";
-import EditedHistoryViewer from "./EditedHistoryViewer";
 
 const FamiliesTable = () => {
   const [families, setFamilies] = useState([]);
@@ -167,25 +166,11 @@ const FamiliesTable = () => {
       alert("No changes found for this family");
     }
   };
-  const handleViewAllChanges = async () => {
-    const fullHistory = await localforage.getItem("editedHistory");
-    if (fullHistory && Object.keys(fullHistory).length > 0) {
-      setDiffData(fullHistory);
-    } else {
-      alert("No changes found");
-    }
-  };
-  
 
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Families Data</h2>
-      <button
-    className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-    onClick={handleViewAllChanges}
-  >
-    View All Changes
-  </button>
+
       <div className="flex gap-4 mb-4">
         <input
           type="text"
@@ -267,7 +252,12 @@ const FamiliesTable = () => {
                       >
                         {expandedRows.has(family.id) ? "-" : "+"}
                       </button>
-                      
+                      <button
+                        onClick={() => getFamilyChanges(family.id)}
+                        className="text-purple-500 hover:underline"
+                      >
+                        View Changes
+                      </button>
                     </td>
                   </tr>
                   {expandedRows.has(family.id) && family.members && (
@@ -304,9 +294,73 @@ const FamiliesTable = () => {
         />
       )}
 {diffData && (
-  <EditedHistoryViewer history={diffData} onClose={() => setDiffData(null)} />
+  
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-xl max-w-lg w-full">
+{console.log("diffData:", diffData)}
+      <h3 className="text-xl font-bold text-purple-600 mb-4">
+        Changes for: {diffData.head} ({diffData.id})
+      </h3>
+
+      <ul className="space-y-2">
+  {Object.entries(diffData).map(([key, value]) => {
+    if (key === "id" || key === "members") return null;
+    if (typeof value === "object" && value.old !== undefined && value.new !== undefined) {
+      return (
+        <li key={key} className="border p-2 rounded">
+          <strong>{key}:</strong><br />
+          <span className="text-red-600">Old:</span> {String(value.old)} <br />
+          <span className="text-green-600">New:</span> {String(value.new)}
+        </li>
+      );
+    }
+    return null;
+  })}
+</ul>
+
+
+      {/* show member changes safely */}
+      {!!diffData.members && Object.keys(diffData.members ?? {}).length > 0 && (
+        <>
+          <h4 className="text-lg font-bold mt-4">Member Changes:</h4>
+          {Object.entries(diffData.members ?? {}).map(([memberId, memberChanges]) => (
+            <div key={memberId} className="border p-3 rounded mt-2">
+              <h5 className="font-semibold">
+                Member ID: {memberId}
+              </h5>
+              <ul className="mt-1 space-y-1">
+                {Object.entries(memberChanges ?? {}).map(([field, changes]) => {
+                  if (field === "id") return null;
+                  if (typeof changes === "object" && changes.old !== undefined && changes.new !== undefined) {
+                    return (
+                      <li key={field}>
+                        <strong>{field}:</strong><br />
+                        <span className="text-red-600">Old:</span> {String(changes.old)}<br />
+                        <span className="text-green-600">New:</span> {String(changes.new)}
+                      </li>
+                    );
+                  }
+                  return null;
+                })}
+              </ul>
+            </div>
+          ))}
+        </>
+      )}
+
+      <button
+        onClick={() => setDiffData(null)}
+        className="mt-4 bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+      >
+        Close
+      </button>
+
+    </div>
+  </div>
 )}
- 
+
+
+   
     </div>
   );
 };

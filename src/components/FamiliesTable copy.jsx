@@ -48,7 +48,7 @@ const FamiliesTable = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Families Data</h2>
+      <h2 className="text-xl font-bold mb-4">Families- Data</h2>
 
       {/* 🔍 Search Inputs */}
       <div className="flex gap-4 mb-4">

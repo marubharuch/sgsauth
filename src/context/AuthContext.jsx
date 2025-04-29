@@ -13,10 +13,9 @@ import localforage from "localforage";
 
 const AuthContext = createContext();
 
-// Clearing LocalForage on initial load (useful for debugging but may cause unnecessary clearing)
+ //*Clearing LocalForage on initial load (useful for debugging but may cause unnecessary clearing)
 await localforage.clear();
 console.log("LocalForage cleared");
-
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
