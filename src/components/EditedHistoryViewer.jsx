@@ -2,17 +2,26 @@ import React from "react";
 import { db } from "../firebase";
 import { ref, push, update } from "firebase/database";
 import localforage from "localforage"
-
-
+//import { AuthContext } from "../context/AuthContext"
+import { useAuth } from "../context/AuthContext";
 const EditedHistoryViewer = ({ history, onClose, onClearHistory, }) => {
   if (!history) return null;
-
+ // const { currentUser } = useContext(AuthContext);
+  const { user } = useAuth()
+  console.log('user',user)
   const handleAppendToServer = async () => {
+    //console.log("CU",currentUser)
     try {
       // 1. Push to edit history log
       const serverRef = ref(db, "editedHistoryLogs");
+      //console.log("CU",currentUser)
       await push(serverRef, {
         timestamp: Date.now(),
+        user: {
+          uid: user?.uid || "anonymous",
+          email: user?.email || "unknown",
+          name:user?.name||"unkown"
+        },
         data: history,
       });
 
