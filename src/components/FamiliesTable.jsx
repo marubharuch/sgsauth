@@ -365,6 +365,8 @@ const FamiliesTable = () => {
             console.log("Closing diff viewer");
             setDiffData(null);
           }}
+          onClearHistory={() => setDiffData(null)}
+
         />
       )}
     </div>
